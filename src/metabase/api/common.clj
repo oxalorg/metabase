@@ -8,6 +8,7 @@
             [metabase.api.common.internal :refer [add-route-param-regexes auto-parse route-dox route-fn-name
                                                   validate-params wrap-response-if-needed]]
             [metabase.models.interface :as mi]
+            [metabase.plugins.classloader :as classloader]
             [metabase.util :as u]
             [metabase.util.i18n :as ui18n :refer [deferred-tru tru]]
             [metabase.util.schema :as su]
@@ -37,8 +38,8 @@
   more information about the Metabase permissions system."
   (atom #{}))
 
-
 ;;; ---------------------------------------- Precondition checking helper fns ----------------------------------------
+
 
 (defn- check-one [condition code message]
   (when-not condition
@@ -93,6 +94,17 @@
   []
   (check-403 *is-superuser?*))
 
+(defn current-user-has-general-permission?
+  [perm-type]
+  (classloader/require 'metabase.public-settings.premium-features)
+  (classloader/require 'metabase.models.permissions)
+  (and ((resolve 'metabase.public-settings.premium-features/enable-advanced-config?))
+       ((resolve 'metabase.models.permissions/set-has-general-permission-of-type)
+        @*current-user-permissions-set* perm-type)))
+
+(defn check-has-general-permissions
+  [perm-type]
+  (check-403 (current-user-has-general-permission? perm-type)))
 
 ;; checkp- functions: as in "check param". These functions expect that you pass a symbol so they can throw exceptions
 ;; w/ relevant error messages.
@@ -396,6 +408,8 @@
   {:added "0.36.0", :style/indent 2}
   [instance changes]
   (check-403 (mi/can-update? instance changes)))
+
+
 
 ;;; ------------------------------------------------ OTHER HELPER FNS ------------------------------------------------
 

@@ -87,6 +87,7 @@
   (context "/search"               [] (+auth search/routes))
   (context "/segment"              [] (+auth segment/routes))
   (context "/session"              [] session/routes)
+  ;; setting is a general endpoints, it's not specifically for admin/setting
   (context "/setting"              [] (+auth setting/routes))
   (context "/setup"                [] setup/routes)
   (context "/slack"                [] (+auth slack/routes))

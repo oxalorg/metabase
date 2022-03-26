@@ -6,27 +6,27 @@
             [metabase.util.schema :as su]))
 
 (api/defendpoint GET "/"
-  "Get all `Settings` and their values. You must be a superuser to do this."
+  "Get all `Settings` and their values. You must be a superuser or have `setting` permission to do this."
   []
   (api/check-superuser)
   (setting/admin-writable-settings))
 
 (api/defendpoint PUT "/"
-  "Update multiple `Settings` values.  You must be a superuser to do this."
+  "Update multiple `Settings` values.  You must be a superuser or have `setting` permission to do this."
   [:as {settings :body}]
   (api/check-superuser)
   (setting/set-many! settings)
   api/generic-204-no-content)
 
 (api/defendpoint GET "/:key"
-  "Fetch a single `Setting`. You must be a superuser to do this."
+  "Fetch a single `Setting`. You must be a superuser or have `setting` permission to do this."
   [key]
   {key su/NonBlankString}
   (api/check-superuser)
   (setting/user-facing-value key))
 
 (api/defendpoint PUT "/:key"
-  "Create/update a `Setting`. You must be a superuser to do this.
+  "Create/update a `Setting`. You must be a superuser or have `setting` permission to do this.
    This endpoint can also be used to delete Settings by passing `nil` for `:value`."
   [key :as {{:keys [value]} :body}]
   {key su/NonBlankString}

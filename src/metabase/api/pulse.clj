@@ -35,6 +35,7 @@
   {archived     (s/maybe su/BooleanString)
    dashboard_id (s/maybe su/IntGreaterThanZero)
    user_id      (s/maybe su/IntGreaterThanZero)}
+  (api/check-has-general-permissions :monitoring)
   (as-> (pulse/retrieve-pulses {:archived?    (Boolean/parseBoolean archived)
                                 :dashboard-id dashboard_id
                                 :user-id      user_id}) <>
@@ -60,6 +61,7 @@
    collection_position (s/maybe su/IntGreaterThanZero)
    dashboard_id        (s/maybe su/IntGreaterThanZero)
    parameters          [su/Map]}
+  (api/check-has-general-permissions :monitoring)
   ;; make sure we are allowed to *read* all the Cards we want to put in this Pulse
   (check-card-read-permissions cards)
   ;; if we're trying to create this Pulse inside a Collection, and it is not a dashboard subscription,
@@ -87,6 +89,7 @@
 (api/defendpoint GET "/:id"
   "Fetch `Pulse` with ID."
   [id]
+  (api/check-has-general-permissions :monitoring)
   (-> (api/read-check (pulse/retrieve-pulse id))
       (hydrate :can_write)))
 
@@ -101,6 +104,7 @@
    archived      (s/maybe s/Bool)
    parameters    [su/Map]}
   ;; do various perms checks
+  (api/check-has-general-permissions :monitoring)
   (let [pulse-before-update (api/write-check Pulse id)]
     (check-card-read-permissions cards)
     (collection/check-allowed-to-change-collection pulse-before-update pulse-updates)
